@@ -1,0 +1,103 @@
+x-service-environment: &service-environment
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-burundifood}
+  SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-burundifood_local}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-burundifood}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-burundifood_local}
+      POSTGRES_DB: postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka/
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+    depends_on:
+      discovery-service:
+        condition: service_started
+    ports:
+      - "8080:8080"
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *service-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundifood_users
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+  parcelle-service:
+    build:
+      context: .
+      dockerfile: parcelle-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *service-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundifood_parcelles
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+  elevage-service:
+    build:
+      context: .
+      dockerfile: elevage-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *service-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundifood_elevage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+  intrant-service:
+    build:
+      context: .
+      dockerfile: intrant-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *service-environment
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundifood_intrants
+    depends_on:
+      postgres:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+volumes:
+  postgres_data:

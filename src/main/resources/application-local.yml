@@ -1,0 +1,6 @@
+# À placer dans src/main/resources/application-local.yml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/burundi_food
+    username: burundi_admin
+    password: burundifood2026

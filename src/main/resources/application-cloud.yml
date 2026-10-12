@@ -1,0 +1,10 @@
+# À placer dans src/main/resources/application-cloud.yml
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/burundi_food
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka

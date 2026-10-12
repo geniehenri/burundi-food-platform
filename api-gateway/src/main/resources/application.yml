@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**,/api/utilisateurs/**
+        - id: parcelle-service
+          uri: lb://parcelle-service
+          predicates:
+            - Path=/api/parcelles/**,/api/cultures/**,/api/plantations/**,/api/pluviometrie/**
+        - id: elevage-service
+          uri: lb://elevage-service
+          predicates:
+            - Path=/api/animaux/**,/api/actes-veterinaires/**
+        - id: intrant-service
+          uri: lb://intrant-service
+          predicates:
+            - Path=/api/engrais/**,/api/commandes/**
+server:
+  port: ${SERVER_PORT:8080}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
