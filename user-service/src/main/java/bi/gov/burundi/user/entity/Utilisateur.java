@@ -1,7 +1,4 @@
 package bi.gov.burundi.user.entity;
-
-package bi.gov.burundi.user.entity;
-
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
