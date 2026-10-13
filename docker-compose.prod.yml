@@ -4,24 +4,23 @@ services:
     container_name: burundi-food-db
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: burundi_food
+      POSTGRES_USER: burundi_admin
+      POSTGRES_PASSWORD: BurundiFood2024!
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - burundi-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U burundi_admin -d burundi_food"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   discovery-service:
     build:
-      context: ./burundifood
-      dockerfile: Ddiscovery-service/ockerfile
+      context: .
+      dockerfile: discovery-service/Dockerfile
     container_name: discovery-service
     restart: always
     environment:
@@ -34,23 +33,25 @@ services:
 
   api-gateway:
     build:
-      context: ./burundifood/api-gateway
+      context: .
+      dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     restart: always
     depends_on:
       - discovery-service
     environment:
       SPRING_PROFILES_ACTIVE: cloud
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL}
-      JWT_SECRET: ${JWT_SECRET}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      JWT_SECRET: burundiFoodSystemSecretKeyForJwtTokenGeneration2024VeryLongKeyMinimum512Bits
     ports:
-      - "8080:8080"
+      - "8000:8080"
     networks:
       - burundi-network
 
   user-service:
     build:
-      context: ./burundifood/user-service
+      context: .
+      dockerfile: user-service/Dockerfile
     container_name: user-service
     restart: always
     depends_on:
@@ -60,17 +61,18 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: cloud
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL}
-      JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundi_food
+      SPRING_DATASOURCE_USERNAME: burundi_admin
+      SPRING_DATASOURCE_PASSWORD: BurundiFood2024!
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      JWT_SECRET: burundiFoodSystemSecretKeyForJwtTokenGeneration2024VeryLongKeyMinimum512Bits
     networks:
       - burundi-network
 
   parcelle-service:
     build:
-      context: ./burundifood/parcelle-service
+      context: .
+      dockerfile: parcelle-service/Dockerfile
     container_name: parcelle-service
     restart: always
     depends_on:
@@ -80,16 +82,17 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: cloud
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundi_food
+      SPRING_DATASOURCE_USERNAME: burundi_admin
+      SPRING_DATASOURCE_PASSWORD: BurundiFood2024!
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     networks:
       - burundi-network
 
   elevage-service:
     build:
-      context: ./backend-springboot/elevage-service
+      context: .
+      dockerfile: elevage-service/Dockerfile
     container_name: elevage-service
     restart: always
     depends_on:
@@ -99,16 +102,17 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: cloud
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundi_food
+      SPRING_DATASOURCE_USERNAME: burundi_admin
+      SPRING_DATASOURCE_PASSWORD: burundifood2026
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     networks:
       - burundi-network
 
   intrant-service:
     build:
-      context: ./burundifood/intrant-service
+      context: .
+      dockerfile: intrant-service/Dockerfile
     container_name: intrant-service
     restart: always
     depends_on:
@@ -118,22 +122,23 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: cloud
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URL}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundi_food
+      SPRING_DATASOURCE_USERNAME: burundi_admin
+      SPRING_DATASOURCE_PASSWORD: BurundiFood2024!
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     networks:
       - burundi-network
 
   web-nodejs:
     build:
       context: ./web-nodejs
+      dockerfile: Dockerfile
     container_name: web-nodejs
     restart: always
     environment:
       NODE_ENV: production
       SPRING_API_URL: http://api-gateway:8080/api
-      SESSION_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: burundiFoodSecretForSession2024
       PORT: 3000
     depends_on:
       - api-gateway
