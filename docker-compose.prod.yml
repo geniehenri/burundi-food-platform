@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: burundi_food
       POSTGRES_USER: burundi_admin
-      POSTGRES_PASSWORD: BurundiFood2024!
+      POSTGRES_PASSWORD: burundifood2026
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
     networks:
@@ -63,7 +63,7 @@ services:
       SPRING_PROFILES_ACTIVE: cloud
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundi_food
       SPRING_DATASOURCE_USERNAME: burundi_admin
-      SPRING_DATASOURCE_PASSWORD: BurundiFood2024!
+      SPRING_DATASOURCE_PASSWORD: burundifood2026
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
       JWT_SECRET: burundiFoodSystemSecretKeyForJwtTokenGeneration2024VeryLongKeyMinimum512Bits
     networks:
@@ -84,7 +84,7 @@ services:
       SPRING_PROFILES_ACTIVE: cloud
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundi_food
       SPRING_DATASOURCE_USERNAME: burundi_admin
-      SPRING_DATASOURCE_PASSWORD: BurundiFood2024!
+      SPRING_DATASOURCE_PASSWORD: burundifood2026
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     networks:
       - burundi-network
@@ -124,7 +124,7 @@ services:
       SPRING_PROFILES_ACTIVE: cloud
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/burundi_food
       SPRING_DATASOURCE_USERNAME: burundi_admin
-      SPRING_DATASOURCE_PASSWORD: BurundiFood2024!
+      SPRING_DATASOURCE_PASSWORD: burundifood2026
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
     networks:
       - burundi-network
