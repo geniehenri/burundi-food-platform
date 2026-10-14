@@ -2,6 +2,7 @@ package bi.gov.burundi.user.controller;
 
 import bi.gov.burundi.user.dto.UtilisateurDTO;
 import bi.gov.burundi.user.entity.Role;
+import bi.gov.burundi.user.repository.UtilisateurRepository;
 import bi.gov.burundi.user.service.UtilisateurService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +15,12 @@ import java.util.UUID;
 public class UtilisateurController {
 
     private final UtilisateurService service;
+    private final UtilisateurRepository repository;
 
-    public UtilisateurController(UtilisateurService service) {
+    public UtilisateurController(UtilisateurService service,
+                                 UtilisateurRepository repository) {
         this.service = service;
+        this.repository = repository;
     }
 
     @GetMapping
@@ -32,6 +36,14 @@ public class UtilisateurController {
     @GetMapping("/role/{role}")
     public List<UtilisateurDTO> getByRole(@PathVariable Role role) {
         return service.getByRole(role);
+    }
+
+    // ✅ NOUVEAU : Recherche par téléphone
+    @GetMapping("/search")
+    public ResponseEntity<?> searchByTelephone(@RequestParam String telephone) {
+        return repository.findByTelephone(telephone)
+                .map(u -> ResponseEntity.ok(UtilisateurDTO.fromEntity(u)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/activer")

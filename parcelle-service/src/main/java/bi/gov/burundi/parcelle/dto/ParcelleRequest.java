@@ -1,6 +1,5 @@
 package bi.gov.burundi.parcelle.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,7 +9,7 @@ import java.util.UUID;
 
 public class ParcelleRequest {
 
-    @NotBlank(message = "Le code parcelle est obligatoire")
+    // ✅ Plus de @NotBlank : le code est généré automatiquement
     private String codeParcelle;
 
     @NotNull
@@ -24,6 +23,7 @@ public class ParcelleRequest {
     private String typeSol;
     private BigDecimal altitudeMoyenneM;
 
+    // ... reste inchangé
     public static class Coord {
         private double latitude;
         private double longitude;
@@ -33,7 +33,6 @@ public class ParcelleRequest {
         public void setLongitude(double longitude) { this.longitude = longitude; }
     }
 
-    // Getters & Setters
     public String getCodeParcelle() { return codeParcelle; }
     public void setCodeParcelle(String codeParcelle) { this.codeParcelle = codeParcelle; }
     public UUID getProprietaireId() { return proprietaireId; }

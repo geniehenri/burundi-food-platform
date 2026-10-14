@@ -27,43 +27,60 @@ public class ParcelleService {
         this.repository = repository;
     }
 
-    @Transactional
-    public ParcelleResponse creer(ParcelleRequest request) {
-        if (request.getCoordonnees() == null || request.getCoordonnees().size() < 3) {
-            throw new RuntimeException("Au moins 3 coordonnées sont nécessaires");
-        }
-
-        Coordinate[] coords = request.getCoordonnees().stream()
-                .map(c -> new Coordinate(c.getLongitude(), c.getLatitude()))
-                .toArray(Coordinate[]::new);
-
-        if (!coords[0].equals2D(coords[coords.length - 1])) {
-            Coordinate[] closed = new Coordinate[coords.length + 1];
-            System.arraycopy(coords, 0, closed, 0, coords.length);
-            closed[coords.length] = coords[0];
-            coords = closed;
-        }
-
-        Polygon polygone = geometryFactory.createPolygon(coords);
-
-        Parcelle p = new Parcelle();
-        p.setCodeParcelle(request.getCodeParcelle());
-        p.setProprietaireId(request.getProprietaireId());
-        p.setMoniteurId(request.getMoniteurId());
-        p.setGeometrie(polygone);
-        p.setTypeSol(request.getTypeSol());
-        p.setAltitudeMoyenneM(request.getAltitudeMoyenneM());
-
-        Parcelle saved = repository.save(p);
-
-        Double superficie = repository.calculerSuperficie(saved.getId());
-        if (superficie != null) {
-            saved.setSuperficieHa(BigDecimal.valueOf(superficie).setScale(4, RoundingMode.HALF_UP));
-            repository.save(saved);
-        }
-
-        return ParcelleResponse.fromEntity(saved);
+  @Transactional
+public ParcelleResponse creer(ParcelleRequest request) {
+    if (request.getCoordonnees() == null || request.getCoordonnees().size() < 3) {
+        throw new RuntimeException("Au moins 3 coordonnées sont nécessaires");
     }
+
+    Coordinate[] coords = request.getCoordonnees().stream()
+            .map(c -> new Coordinate(c.getLongitude(), c.getLatitude()))
+            .toArray(Coordinate[]::new);
+
+    if (!coords[0].equals2D(coords[coords.length - 1])) {
+        Coordinate[] closed = new Coordinate[coords.length + 1];
+        System.arraycopy(coords, 0, closed, 0, coords.length);
+        closed[coords.length] = coords[0];
+        coords = closed;
+    }
+
+    Polygon polygone = geometryFactory.createPolygon(coords);
+
+    Parcelle p = new Parcelle();
+    
+    // ✅ GÉNÉRATION AUTOMATIQUE DU CODE PARCELLE
+    String codeAuto = request.getCodeParcelle();
+    if (codeAuto == null || codeAuto.trim().isEmpty()) {
+        codeAuto = genererCodeParcelle(request.getTypeSol());
+    }
+    p.setCodeParcelle(codeAuto);
+    
+    p.setProprietaireId(request.getProprietaireId());
+    p.setMoniteurId(request.getMoniteurId());
+    p.setGeometrie(polygone);
+    p.setTypeSol(request.getTypeSol());
+    p.setAltitudeMoyenneM(request.getAltitudeMoyenneM());
+
+    Parcelle saved = repository.save(p);
+
+    Double superficie = repository.calculerSuperficie(saved.getId());
+    if (superficie != null) {
+        saved.setSuperficieHa(BigDecimal.valueOf(superficie).setScale(4, RoundingMode.HALF_UP));
+        repository.save(saved);
+    }
+
+    return ParcelleResponse.fromEntity(saved);
+}
+
+// ✅ Méthode utilitaire pour générer un code unique
+private String genererCodeParcelle(String typeSol) {
+    // Format : PARC-YYYYMMDD-XXXX
+    String date = java.time.LocalDate.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+    long count = repository.count() + 1;
+    String numero = String.format("%04d", count);
+    return "PARC-" + date + "-" + numero;
+}
 
     public ParcelleResponse getById(UUID id) {
         Parcelle p = repository.findById(id)
